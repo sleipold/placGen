@@ -138,32 +138,78 @@ CONSTASS: 	IDENT "=" INTNUMBER
 					insert(KONST, $1, $3);
 			};
 
-VARDECL: 	"var" VARTYPES ";" |
+VARDECL: 	"var" VARASSIGNS ";" |
 			/* leer */;
 
-VARTYPES: 	VARTYPE |
-			VARTYPE "," VARTYPES;
+VARASSIGNS: VARASS |
+			VARASS "," VARASSIGNS;
 
-VARTYPE: 	IDENT ":" TYP
+VARASS: IDENT ":" TYP
+		{
+			/* wenn ident schon vergeben */
+			if (lookup_in_actsym($1) != NULL) {
+				error(34);
+			} else {
+				switch($3) {
+					case INTIDENT:
+						insert(INTIDENT,$1,NULL);
+						break;
+					case REALIDENT:
+						insert(REALIDENT,$1,NULL);
+						break;
+				}
+			}
+		};
+
+PROCDECL: 	PROCDECL PROCDECLS |
+			/* leer */;
+
+PROCDECLS:	"procedure" IDENT ";"
 			{
-				if (lookup_in_actsym($1) != NULL) {
+				/* wenn ident schon vergeben */
+				if (lookup($2) != NULL) {
 					error(34);
 				} else {
-					switch($3) {
-						case INTIDENT:
-							insert(INTIDENT,$1,NULL);
-							break;
-						case REALIDENT:
-							insert(REALIDENT,$1,NULL);
-							break;
-					}
+					actsym = insert(PROC, $2, 0)->subsym;
 				}
-			};
+			}
+			BLOCK ";";
 
-PROCDECL: /* TODO */;
+STATEMENT:	IDENT ":=" EXPRESSION
+			{
+				symentry = lookup($1);
+				if (symentry == NULL) {
+					error(10);
+				} else {
+					idTyp = symentry->type;
+					if (idTyp == PROC)
+						error(11);
+					if (idTyp != $3)
+						error(36);
+				}
+			} 
+			| 
+			"call" IDENT
+			{
+				symentry = lookup($2);
+				if (symentry == NULL) {
+					error(10);
+					exit(-1);
+				}
 
-STATEMENT: /* TODO */;
-		
+				int idTyp = -1;
+				idTyp = symentry->type;
+				if (idTyp != PROC)
+					error(14);
+			}
+			| "begin" STATEMENTS "end"
+			| "if" CONDITION "then" STATEMENT STATEMENTFI "fi"
+			| "while" CONDITION "do" STATEMENT;
+
+STATEMENTS: STATEMENTS ";" STATEMENT | STATEMENT;
+
+STATEMENTFI: "else" STATEMENT | ;
+
 CONDITION: EXPRESSION RELOP EXPRESSION;
 		
 RELOP: "=" | "!=" | "<" | "<=" | ">" | ">=";
