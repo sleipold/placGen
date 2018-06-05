@@ -2,11 +2,9 @@
 	Definition der Grammatik von PLA fuer Bison inkl. einfacher
 	Symboltabellenverwaltung.
 	
-	Letzte Änderung SS 2017  msr
+	Letzte ï¿½nderung SS 2017  msr
 	
 */
-
-
 
 /*	---- Deklarationen ----			*/
 %{
@@ -62,9 +60,10 @@
 	z.B.:	expr: expr PLUS expr
 
 */
+
 %token <num> INTNUMBER	2561			/* Int-Konstante */ 
 %token <realnum> REALNUMBER  2562		/* Real-Konstante */ 
-%token <idname> IDENT  	257			/* Identifikator */ 
+%token <idname> IDENT  	257				/* Identifikator */ 
 %token CONST 		258	"const"	
 %token VAR  		259	"var"	 
 %token PROCEDURE	260	"procedure"
@@ -100,6 +99,7 @@
 %token FALSCH		289	"false"
 %token PROGEND 		290 "$"
 %token FI 		291  "fi"
+
 /*
 	Das Nichtterminal TYP hat einen numerischen Wert, naemlich
 	INTIDENT, REALIDENT 
@@ -107,95 +107,131 @@
 
 %type <num> TYP
 
-
-
 /* Nichtterminales Startsymbol */
 %start PROGRAM
 
 %%
 /*	---- Grammatik und Aktionen ----	*/
-PROGRAM:	{
+PROGRAM: {
 			/* als erstes die Symboltabelle initialisieren */
 			actsym = create_newsym();
-		}
-		BLOCK "$"
-		;
-		
+		} BLOCK "$";
 
-	......
-	......
-	.....
-	
+BLOCK: 	CONSTDECL VARDECL PROCDECL STATEMENT
+		{
+			if (actsym->precsym != NULL)
+				actsym = precsym;	/* wechsel auf vorherige Symboltabelle */
+		};
 
-		
+CONSTDECL: "const" CONSTASSIGNS ";" |
+			/* leer */;
 
-		
-CONDITION:	EXPRESSION RELOP EXPRESSION
-		;
-		
-RELOP:		"=" | "!=" | "<" | "<=" | ">" | ">="
-		;
-		
-EXPRESSION:	EXPRESSION "+" TERM 
-		
+CONSTASSIGNS: 	CONSTASS |
+				CONSTASSIGNS "," CONSTASS;
 
-		|
+CONSTASS: 	IDENT "=" INTNUMBER
+			{
+				/* wenn ident schon vergeben */
+				if (lookup_in_actsym($1) != NULL)
+					error(34);
+				else
+					insert(KONST, $1, $3);
+			};
 
-		EXPRESSION "-" TERM 
-		
+VARDECL: 	"var" VARASSIGNS ";" |
+			/* leer */;
 
-		|
+VARASSIGNS: VARASS |
+			VARASS "," VARASSIGNS;
 
-		TERM
-		
+VARASS: IDENT ":" TYP
+		{
+			/* wenn ident schon vergeben */
+			if (lookup_in_actsym($1) != NULL) {
+				error(34);
+			} else {
+				switch($3) {
+					case INTIDENT:
+						insert(INTIDENT,$1,NULL);
+						break;
+					case REALIDENT:
+						insert(REALIDENT,$1,NULL);
+						break;
+				}
+			}
+		};
 
-		;
-		
-TERM:		TERM "*" FACTOR 
-		
+PROCDECL: 	PROCDECL PROCDECLS |
+			/* leer */;
 
-		|
+PROCDECLS:	"procedure" IDENT ";"
+			{
+				/* wenn ident schon vergeben */
+				if (lookup($2) != NULL) {
+					error(34);
+				} else {
+					actsym = insert(PROC, $2, 0)->subsym;
+				}
+			}
+			BLOCK ";";
 
-		TERM "/" FACTOR 
+STATEMENT:	IDENT ":=" EXPRESSION
+			{
+				symentry = lookup($1);
+				if (symentry == NULL) {
+					error(10);
+				} else {
+					idTyp = symentry->type;
+					if (idTyp == PROC)
+						error(11);
+					if (idTyp != $3)
+						error(36);
+				}
+			} 
+			| 
+			"call" IDENT
+			{
+				symentry = lookup($2);
+				if (symentry == NULL) {
+					error(10);
+					exit(-1);
+				}
 
-		
+				int idTyp = -1;
+				idTyp = symentry->type;
+				if (idTyp != PROC)
+					error(14);
+			}
+			| "begin" STATEMENTS "end"
+			| "if" CONDITION "then" STATEMENT STATEMENTFI "fi"
+			| "while" CONDITION "do" STATEMENT;
 
+STATEMENTS: STATEMENTS ";" STATEMENT | STATEMENT;
 
-		|
+STATEMENTFI: "else" STATEMENT | ;
 
-		FACTOR
+CONDITION: EXPRESSION RELOP EXPRESSION;
 		
+RELOP: "=" | "!=" | "<" | "<=" | ">" | ">=";
 		
-
-		;
+EXPRESSION:	EXPRESSION "+" TERM | 
+			EXPRESSION "-" TERM | 
+			TERM;
 		
-FACTOR:		IDENT
-		{	symentry= lookup($1); 
-			if (symentry== NULL)
-				error(10);		/* nicht deklariert */
-			
-		}
-
-		|
-		INTNUMBER 	
-		|
-		REALNUMBER
+TERM: 	TERM "*" FACTOR |
+		TERM "/" FACTOR |
+		FACTOR;
 		
-		|
-		"(" EXPRESSION ")"
+FACTOR: IDENT 	{
+					symentry= lookup($1); 
+					if (symentry== NULL) error(10);	/* nicht deklariert */
+				} |
+				INTNUMBER |
+				REALNUMBER |
+				"(" EXPRESSION ")"; 
 		
-		
-
-		; 
-		
-TYP:	"int" 
-		{ $$ = INTIDENT;}
-		|				
-		"real" 
-		{$$ = REALIDENT; }
-		
-		
-		;
+TYP:	"int" { $$ = INTIDENT;} | 
+		"real" {$$ = REALIDENT;} ;
 
 %%
 /*	---- abschliessender C-Code ----	*/
