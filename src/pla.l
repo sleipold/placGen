@@ -37,44 +37,44 @@ ID 	[a-zA-Z][a-zA-Z0-9]
 "else"		return ELSE;
 "while"		return WHILE; 		
 "do"		return DO;
-"="			return EQ;
+"="		return EQ;
 "!="		return NE;
-"<"			return LT;
+"<"		return LT;
 "<="		return LE;
-">"			return GT;
+">"		return GT;
 ">="		return GE;
 ":="		return ASS;
-","			return KOMMA;
-";"			return SEMICOLON;
-"+"			return PLUS;
-"-"			return MINUS;
-"*"			return MULT;
-"/"			return DIV;
-"("			return KLAUF;
-")"			return KLZU;
-"."			return PUNKT;
-":"			return COLON; 
+","		return KOMMA;
+";"		return SEMICOLON;
+"+"		return PLUS;
+"-"		return MINUS;
+"*"		return MULT;
+"/"		return DIV;
+"("		return KLAUF;
+")"		return KLZU;
+"."		return PUNKT;
+":"		return COLON; 
 "int"		return INT;
 "real"		return REAL; 
 "boolean"	return BOOL; 
 "true"		return WAHR;
 "false"		return FALSCH;
-"$"			return PROGEND;
+"$"		return PROGEND;
 "fi"		return FI;
 
 {DIGIT}+	{	
 				yylval.num = atoi(yytext);
 		 		return (INTNUMBER);
-			}
-{DIGIT}+,{DIGTI}+	{
+		}
+{DIGIT}+"."{DIGTI}+	{
 						yylval.realnum = atof(yytext);
 						return (REALNUMBER);
-					}
+			}
 
 {ID}*		{
 				strcpy(yylval.idname, yytext);
 				return IDENT;
-			}
+		}
 
 [ \t\n\r]		/* Whitespaces ignorieren */
 
