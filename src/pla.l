@@ -63,13 +63,13 @@ ID 	[a-zA-Z][a-zA-Z0-9]
 "fi"		return FI;
 
 {DIGIT}+	{	
-				yylval.num = atoi(yytext);
-		 		return (INTNUMBER);
-		}
+				    yylval.num = atoi(yytext);
+		 		    return (INTNUMBER);
+          }
 {DIGIT}+"."{DIGTI}+	{
 						yylval.realnum = atof(yytext);
 						return (REALNUMBER);
-			}
+			  }
 
 {ID}*		{
 				strcpy(yylval.idname, yytext);
