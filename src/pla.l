@@ -66,7 +66,7 @@ ID 	[a-zA-Z][a-zA-Z0-9]
 				yylval.num = atoi(yytext);
 		 		return (INTNUMBER);
 			}
-{DIGIT}+,{DIGTI}+	{
+{DIGIT}+,{DIGIT}+	{
 						yylval.realnum = atof(yytext);
 						return (REALNUMBER);
 					}

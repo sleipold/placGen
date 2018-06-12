@@ -118,7 +118,7 @@ PROGRAM: {
 		} BLOCK "$";
 
 BLOCK: 	CONSTDECL VARDECL PROCDECL STATEMENT
-		{
+		{/*
 			if (actsym->precsym != NULL)
 				actsym = precsym;	/* wechsel auf vorherige Symboltabelle */
 		};
@@ -180,13 +180,11 @@ STATEMENT:	IDENT ":=" EXPRESSION
 				symentry = lookup($1);
 				if (symentry == NULL) {
 					error(10);
-				} else {
-					idTyp = symentry->type;
-					if (idTyp == PROC)
-						error(11);
-					if (idTyp != $3)
-						error(36);
-				}
+				} 
+				if (symentry->type == PROC)
+					error(11);
+				if (symentry->type == KONST)
+					error(36);
 			} 
 			| 
 			"call" IDENT
