@@ -24,7 +24,7 @@ DIGIT	[0-9]
 ID 	[a-zA-Z][a-zA-Z0-9]
 
 /*	---- Scanner-Regeln ----	*/
-%%
+%%	
 
 "const"		return CONST;
 "var"		return VAR;
@@ -65,18 +65,21 @@ ID 	[a-zA-Z][a-zA-Z0-9]
 {DIGIT}+	{	
 				    yylval.num = atoi(yytext);
 		 		    return (INTNUMBER);
-          }
+          	}
+
 {DIGIT}+"."{DIGIT}+	{
 						yylval.realnum = atof(yytext);
 						return (REALNUMBER);
-			  }
+			  		}
 
-{ID}*		{
+{ID}*	{
 				strcpy(yylval.idname, yytext);
 				return IDENT;
 		}
 
-[ \t\n\r]		/* Whitespaces ignorieren */
+[ \t\r]		/* Whitespaces ignorieren */
+
+[\n] yylineno++;
 
 
 .		{	/* alle anderen Zeichen sind Fehler */
