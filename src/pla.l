@@ -21,7 +21,7 @@
 
 /* Definitionen fuer flex */
 DIGIT	[0-9]
-ID 	[a-zA-Z][a-zA-Z0-9]
+ID 	[a-zA-Z][a-zA-Z0-9]*
 
 /*	---- Scanner-Regeln ----	*/
 %%	
@@ -72,7 +72,7 @@ ID 	[a-zA-Z][a-zA-Z0-9]
 						return (REALNUMBER);
 			  		}
 
-{ID}*	{
+{ID}	{
 				strcpy(yylval.idname, yytext);
 				return IDENT;
 		}
