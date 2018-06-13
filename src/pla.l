@@ -77,9 +77,7 @@ ID 	[a-zA-Z][a-zA-Z0-9]*
 				return IDENT;
 		}
 
-[ \t\r]		/* Whitespaces ignorieren */
-
-[\n] yylineno++;
+[ \t\n\r]		/* Whitespaces ignorieren */
 
 
 .		{	/* alle anderen Zeichen sind Fehler */
