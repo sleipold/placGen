@@ -118,9 +118,9 @@ PROGRAM: {
 		} BLOCK "$";
 
 BLOCK: 	CONSTDECL VARDECL PROCDECL STATEMENT
-		{/*
+		{
 			if (actsym->precsym != NULL)
-				actsym = precsym;	/* wechsel auf vorherige Symboltabelle */
+				actsym = actsym->precsym;	/* wechsel auf vorherige Symboltabelle */
 		};
 
 CONSTDECL: "const" CONSTASSIGNS ";" |
